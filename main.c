@@ -10,11 +10,17 @@
 
 float animation_parameter = 0;
 int animation_ongoing = 0;
+float animation_parameter_3 = 0;
+
+int current_color = 3;
+int cube_color = 3;
+int krece_se = 2;
+
 
 static void on_display();
 static void on_reshape(int width, int height);
 static void on_keyboard(unsigned char key, int x, int y);
-//static void on_timer(int id);
+static void on_timer(int id);
 
 int generate_random();
 void draw_cube();
@@ -76,15 +82,79 @@ void on_reshape(int width, int height) {
     gluPerspective(30, (float) width/height, 1, 1000);
 }
 
-static void on_timer(int id) {}
-static void on_keyboard(unsigned char key, int x, int y) {
-    
+void on_keyboard(unsigned char key, int x, int y) {
+    switch(key) {
+        case 'g':
+        case 'G':
+            if(!animation_ongoing ) {
+                animation_ongoing = 1;
+                krece_se++;
+                cube_color = 2;
+                if (current_color != cube_color) {
+                    animation_ongoing = 0;
+                }
+                else {
+                    glutTimerFunc(TIMER_INTERVAL, on_timer, TIMER_ID);
+                }
+            }
+            
+            break;
+        case 's':
+        case 'S':
+            animation_ongoing = 0;
+            break;
+        case 'r':
+        case 'R':
+            if(!animation_ongoing ) {
+                animation_ongoing = 1;
+                krece_se++;
+                cube_color = 1;
+                if (current_color != cube_color) {
+                    animation_ongoing = 0;
+                }
+                else
+                    glutTimerFunc(TIMER_INTERVAL, on_timer, TIMER_ID);
+            }
+            break;
+        case 'b':
+        case 'B':
+            if(!animation_ongoing ) {
+                animation_ongoing = 1;
+                krece_se++;
+                cube_color = 3;
+                if (current_color != cube_color) {
+                    animation_ongoing = 0;
+                }
+                else
+                    glutTimerFunc(TIMER_INTERVAL, on_timer, TIMER_ID);
+            }
+            break;
+        case 27:
+          exit(0);
+          break;
+    }
 }
 
-/*void on_timer(int id) {
-    
+
+void on_timer(int id) {
+    if (id == TIMER_ID) {
+
+        if (animation_parameter_3 >= 0.85) {
+            animation_ongoing = 0;
+            animation_parameter_3 = 0;
+            return;
+        }
+        animation_parameter += 0.1f;
+        animation_parameter_3 += 0.1f;
+    }
+
+    glutPostRedisplay();
+
+    if (animation_ongoing) {
+        glutTimerFunc(TIMER_INTERVAL, on_timer, TIMER_ID);
+    }
 }
-*/
+
 void draw_cube() {
     
     glPushMatrix();
@@ -174,24 +244,30 @@ void on_display() {
         glTranslatef(0.6, 0.0, 0.0);
         draw_cube();
         
-        for(int i = 0; i < 5; i++) {
-	
+        for(int i = 0; i < krece_se; i++) {
+            glTranslatef(0.6, 0.0, 0.0);
             int nu = generate_random();
+            glPushMatrix();
             if (nu == 1)
                 glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, red);
             else if (nu == 2)
                 glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, green);
             else
                 glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, blue);
-            glTranslatef(0.6, 0.0, 0.0);
-            
+            current_color = nu;
             draw_cube();
+            glPopMatrix();
 	
         }
+        glPopMatrix();
+        glPushMatrix();
+            glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, b);
+            glTranslatef(0.0, 0.5, 0.0);
+            glutSolidCube(0.5);
+       glPopMatrix(); 
+       
+    glPopMatrix();
     
-        
-        
-    glPopMatrix();    
     glutSwapBuffers();
 }
 
